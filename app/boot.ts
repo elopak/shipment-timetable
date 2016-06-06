@@ -1,8 +1,8 @@
 import { bootstrap } from '@angular/platform-browser-dynamic';
 import { enableProdMode } from '@angular/core';
-import { TimetableComponent } from './components/TimetableComponent';
+import { DatePickerComponent } from './components/DatePickerComponent';
 import 'rxjs/Rx'
 
 enableProdMode();
 
-bootstrap(TimetableComponent);
+bootstrap(DatePickerComponent);

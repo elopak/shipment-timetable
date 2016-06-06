@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {AlertComponent, DATEPICKER_DIRECTIVES} from 'ng2-bootstrap/ng2-bootstrap';
 
 @Component({
-  selector: 'my-app',
+  selector: 'datepicker',
   directives: [AlertComponent, DATEPICKER_DIRECTIVES],
   template: `
     <alert type="info">ng2-bootstrap hello world!</alert>
@@ -13,7 +13,7 @@ import {AlertComponent, DATEPICKER_DIRECTIVES} from 'ng2-bootstrap/ng2-bootstrap
       </div>
   `,
 })
-export class AppComponent {
+export class DatePickerComponent {
   public dt:Date = new Date();
   private minDate:Date = null;
   private events:Array<any>;
