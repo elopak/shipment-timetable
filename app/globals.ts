@@ -1,5 +1,5 @@
 import { Interval } from './classes/Interval';
-import { Client } from './classes/Client';
+import { Customer } from './classes/Customer';
 import { Agent } from './classes/Agent';
 import { Year } from './classes/Year';
 
@@ -7,9 +7,9 @@ export var LOCALE = 'ru-RU';
 export var YEAR    = Year.fromDate(new Date());
 export var WEEKS   = YEAR.getWeeks();
 export var CLIENTS = [
-    new Client('WBD'),
-    new Client('Danone'),
-    new Client('Lactalis')
+    new Customer('WBD'),
+    new Customer('Danone'),
+    new Customer('Lactalis')
 ];
 
 export var AGENTS = [

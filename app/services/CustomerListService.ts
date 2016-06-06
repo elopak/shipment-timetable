@@ -1,6 +1,8 @@
 import { Injectable }     from '@angular/core';
 import { Http, Response } from '@angular/http';
 import { Observable }     from 'rxjs/Observable';
+import { Customer } from '../classes/Customer';
+
 @Injectable()
 export class CustomerListService {
     constructor (private http: Http) {}

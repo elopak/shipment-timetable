@@ -1,5 +1,5 @@
 import { Agent } from './Agent';
-import { Client } from './Client';
+import { Customer } from './Customer';
 import { Day } from './Day';
 import { Interval } from './Interval';
 import { INTERVALS } from '../globals';
@@ -7,7 +7,7 @@ import { WeekDayInterval } from './WeekDayInterval';
 
 export class Shipment {
     urgent: boolean;
-    client: Client;
+    client: Customer;
     agent: Agent;
     vehicle: string;
     driver: string;
@@ -47,7 +47,7 @@ export class Shipment {
         return this.getActualInterval() === this.getPlannedInterval();
     }
 
-    constructor(client: Client, agent: Agent, plannedWeekDayInterval: WeekDayInterval, plannedPallets: number) {
+    constructor(client: Customer, agent: Agent, plannedWeekDayInterval: WeekDayInterval, plannedPallets: number) {
         this.client                 = client;
         this.agent                  = agent;
         this.plannedPallets         = plannedPallets;

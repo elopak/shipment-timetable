@@ -32,7 +32,6 @@
                 {{selectedWeek.getFormattedDate(day)}}
             </td>
             <td>{{interval}}</td>
-            <td><customer-input></customer-input></td>
             <td></td>
             <td></td>
             <td></td>
@@ -41,6 +40,7 @@
             <td></td>
             <td></td>
             <td></td>
+            <td><datepicker [(ngModel)]="now" [minDate]="now" [showWeeks]="true"></datepicker></td>
             <td></td>
             <td></td>
             <td></td>
