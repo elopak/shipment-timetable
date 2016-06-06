@@ -1,0 +1,50 @@
+<table class="table-schedule">
+    <tr>
+        <td colspan="14">
+            Неделя
+            <input #num type="number" min="1" max="{{weeks.length}}" value="{{selectedWeek.index}}" (change)="selectWeek(num.value)">
+        </td>
+    </tr>
+    <tr class="selected">
+        <th rowspan="2">День</th>
+        <th rowspan="2">Окно</th>
+        <th rowspan="2">Клиент</th>
+        <th rowspan="2">Экспедитор</th>
+        <th colspan="2">Кол-во паллет</th>
+        <th rowspan="2">Реализация</th>
+        <th rowspan="2">Машина</th>
+        <th rowspan="2">Водитель</th>
+        <th rowspan="2">Телефон</th>
+        <th rowspan="2">Прибытие</th>
+        <th rowspan="2">Отгрузка</th>
+        <th colspan="2">Комментарии</th>
+    </tr>
+    <tr class="selected">
+        <th>План</th>
+        <th>Факт</th>
+        <th>МЮ</th>
+        <th>Склад</th>
+    </tr>
+    <template ngFor #day let-day [ngForOf]="days">
+        <tr *ngFor="let interval of intervals">
+            <td *ngIf="interval.index==1" rowspan="4">
+                {{day.name}}<br>
+                {{selectedWeek.getFormattedDate(day)}}
+            </td>
+            <td>{{interval}}</td>
+            <td><customer-input></customer-input></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </template>
+</table>
+
