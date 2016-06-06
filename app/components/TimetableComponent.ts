@@ -4,12 +4,12 @@ import { Shipment } from '../classes/Shipment';
 import { WeekDayInterval } from '../classes/WeekDayInterval';
 import { Day } from '../classes/Day';
 import { Week } from '../classes/Week';
-import { DATEPICKER_DIRECTIVES } from 'ng2-bootstrap/ng2-bootstrap';
+import { DatePickerComponent } from '../components/DatePickerComponent';
 
 @Component({
     selector: 'timetable',
-    templateUrl: '../templates/timetable.html',
-    directives: [DATEPICKER_DIRECTIVES]
+    templateUrl: 'app/templates/timetable.html',
+    directives: [DatePickerComponent]
 })
 export class TimetableComponent {
     now                               = new Date();
