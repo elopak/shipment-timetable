@@ -4,8 +4,8 @@ import { Week } from './Week';
 
 export class Year extends Indexed {
     getTotalDays(): number {
-        var firstDate  = new Date(this.index, 0, 1);
-        var secondDate = new Date(this.index + 1, 0, 1);
+        var firstDate  = new Date(this.id, 0, 1);
+        var secondDate = new Date(this.id + 1, 0, 1);
         return Math.round(Math.abs((firstDate.getTime() - secondDate.getTime()) / Day.MILLISECONDS));
     }
 
@@ -16,7 +16,7 @@ export class Year extends Indexed {
     getWeeks(): Week[] {
         var weeks: Week[] = [];
         for (var day = 1; day <= this.getTotalDays(); day += 7) {
-            var date = new Date(this.index, 0, day);
+            var date = new Date(this.id, 0, day);
             var week = Week.fromDate(date);
             weeks.push(week);
         }
@@ -24,6 +24,6 @@ export class Year extends Indexed {
     }
 
     getStartDate(): Date {
-        return new Date(this.index, 0, 1);
+        return new Date(this.id, 0, 1);
     }
 }

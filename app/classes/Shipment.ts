@@ -1,56 +1,48 @@
-import { Agent } from './Agent';
-import { Customer } from './Customer';
 import { Day } from './Day';
 import { Interval } from './Interval';
-import { INTERVALS } from '../globals';
 import { WeekDayInterval } from './WeekDayInterval';
+import { Indexed } from './Indexed';
+import { Time } from './Time';
+import { Week } from './Week';
+import { TimetableComponent } from '../components/TimetableComponent';
 
-export class Shipment {
-    urgent: boolean;
-    client: Customer;
-    agent: Agent;
+export class Shipment extends Indexed {
+    customerId: number;
+    dispatcherId: number;
+    telephone: number;
+    plannedPallets: number;
+    actualPallets: number;
+    created: Time;
+    edited: Time;
+    plannedLoad: Time;
+    arrived: Time;
+    loaded: Time;
+
+    ticket: string;
     vehicle: string;
     driver: string;
-    phone: number;
-    ticket: string;
-    commentsMU: string;
-    commentsLogistics: string;
-    plannedPallets: number;
-    plannedWeekDayInterval: WeekDayInterval;
-    actualPallets: number;
-    actualArrivalTime: Date;
-    actualLoadTime: Date;
-
-    getPlannedDay(): Day {
-        return this.plannedWeekDayInterval.day;
-    }
+    comments: string;
 
     getActualInterval(): Interval {
-        if (!this.actualLoadTime) return null;
-        for (var interval of INTERVALS) {
-            var loadHour = this.actualLoadTime.getHours();
+        if (!this.loaded) return null;
+        for (var interval of TimetableComponent.INTERVALS) {
+            var loadHour = this.loaded.getHour();
             if (loadHour >= interval.startHour && loadHour <= interval.endHour) return interval;
         }
         return null;
     }
 
     getPlannedInterval(): Interval {
-        if (!this.plannedWeekDayInterval) return null;
-        return this.plannedWeekDayInterval;
+        var date = this.plannedLoad.getDate();
+        return new WeekDayInterval(Week.fromDate(date), Day.fromDate(date), Interval.fromDate(date));
     }
 
     isCompleted(): boolean {
-        return this.actualLoadTime == null;
+        return this.loaded != null;
     }
 
     isOnTime(): boolean {
         return this.getActualInterval() === this.getPlannedInterval();
     }
 
-    constructor(client: Customer, agent: Agent, plannedWeekDayInterval: WeekDayInterval, plannedPallets: number) {
-        this.client                 = client;
-        this.agent                  = agent;
-        this.plannedPallets         = plannedPallets;
-        this.plannedWeekDayInterval = plannedWeekDayInterval;
-    }
 }

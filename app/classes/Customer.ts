@@ -1,4 +1,4 @@
-import { Named } from './Named';
+import { IndexedNamed } from './IndexedNamed';
 
-export class Customer extends Named {
+export class Customer extends IndexedNamed {
 }

@@ -3,8 +3,8 @@ import { Indexed } from './Indexed';
 export class IndexedNamed extends Indexed {
     name: string;
 
-    constructor(index: number, name: string) {
-        super(index);
+    constructor(id: number, name: string) {
+        super(id);
         this.name = name;
     }
 

@@ -1,17 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Http, Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
-import { Customer } from '../classes/Customer';
+import { Shipment } from '../classes/Shipment';
+import { Time } from '../classes/Time';
 
 @Injectable()
-export class CustomerListService {
+export class ShipmentListService {
     constructor(private http: Http) {
     }
 
-    private url = '10.7.84.13/customers';
+    private url = '10.7.84.13/shipments?time=';
 
-    get(): Observable<Customer[]> {
-        return this.http.get(this.url)
+    get(time: Time): Observable<Shipment[]> {
+        return this.http.get(this.url + time.value)
             .map(this.extractData)
             .catch(this.handleError);
     }

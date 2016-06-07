@@ -1,8 +1,8 @@
 import { Indexed } from './Indexed';
 import { Day } from './Day';
 import { Year } from './Year';
-import { LOCALE } from '../globals';
-import { WeekDayInterval } from './WeekDayInterval';
+import { Time } from './Time';
+import { TimetableComponent } from '../components/TimetableComponent';
 
 export class Week extends Indexed {
     year: Year;
@@ -38,9 +38,9 @@ export class Week extends Indexed {
         var firstDay = this.year.getStartDate();
         var offset   = firstDay.getTimezoneOffset();
         firstDay.setDate(firstDay.getDate() + 4 - (firstDay.getDay() || 7));
-        firstDay.setTime(firstDay.getTime() + 7 * Day.MILLISECONDS * (this.index + (this.year.index == firstDay.getFullYear() ? -1 : 0 )));
+        firstDay.setTime(firstDay.getTime() + 7 * Day.MILLISECONDS * (this.id + (this.year.id == firstDay.getFullYear() ? -1 : 0 )));
         firstDay.setTime(firstDay.getTime() + (firstDay.getTimezoneOffset() - offset) * 60 * 1000);
-        firstDay.setDate(firstDay.getDate() - 3 + day.index - 1);
+        firstDay.setDate(firstDay.getDate() - 3 + day.id - 1);
         return firstDay;
     }
 
@@ -48,17 +48,20 @@ export class Week extends Indexed {
         return this.getDate(Day.MONDAY);
     }
 
+    getStartTime(): Time {
+        return Time.fromDate(this.getStartDate());
+    }
+
     getEndDate(): Date {
         return this.getDate(Day.SUNDAY);
     }
 
-    getFormattedRange(): string {        
+    getFormattedRange(): string {
         return this.getFormattedDate(Day.MONDAY) + ' – ' + this.getFormattedDate(Day.SUNDAY);
     }
 
     getFormattedDate(day: Day): string {
-        return this.getDate(day).toLocaleDateString(LOCALE);
+        return this.getDate(day).toLocaleDateString(TimetableComponent.LOCALE);
     }
-
 
 }

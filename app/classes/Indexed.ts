@@ -1,15 +1,15 @@
 export class Indexed {
-    index: number;
+    id: number;
 
-    constructor(index: number) {
-        this.index = index;
+    constructor(id: number) {
+        this.id = id;
     }
 
     equals(indexed: Indexed): boolean {
-        return indexed.index == this.index;
+        return indexed.id == this.id;
     }
 
     public toString(): string {
-        return this.index.toString();
+        return this.id.toString();
     }
 }

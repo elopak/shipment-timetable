@@ -25,4 +25,8 @@ export class Day extends IndexedNamed {
     public toString(): string {
         return this.name;
     }
+
+    public static fromDate(date: Date): Day {
+        return Day.getDays()[date.getDay() - 1];
+    }
 }

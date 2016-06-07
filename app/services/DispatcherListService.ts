@@ -1,16 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Http, Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
-import { Customer } from '../classes/Customer';
+import { Shipment } from '../classes/Shipment';
+import { Dispatcher } from '../classes/Dispatcher';
 
 @Injectable()
-export class CustomerListService {
+export class DispatcherListService {
     constructor(private http: Http) {
     }
 
-    private url = '10.7.84.13/customers';
+    private url = '10.7.84.13/dispatchers';
 
-    get(): Observable<Customer[]> {
+    get(): Observable<Dispatcher[]> {
         return this.http.get(this.url)
             .map(this.extractData)
             .catch(this.handleError);

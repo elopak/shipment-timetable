@@ -1,13 +1,19 @@
 import { Interval } from './Interval';
 import { Day } from './Day';
+import { Time } from './Time';
+import { Week } from './Week';
 
 export class WeekDayInterval extends Interval {
-    week: number;
+    week: Week;
     day: Day;
 
-    constructor(week: number, day: Day, index: number) {
-        super(index);
+    constructor(week: Week, day: Day, interval: Interval) {
+        super(interval.id);
         this.week = week;
         this.day = day;
+    }
+    
+    getStartTime(): Time {
+        return this.week.getStartTime();
     }
 }

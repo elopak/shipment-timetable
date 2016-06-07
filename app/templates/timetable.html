@@ -2,7 +2,7 @@
     <tr>
         <td colspan="14">
             Неделя
-            <input #num type="number" min="1" max="{{weeks.length}}" value="{{selectedWeek.index}}" (change)="selectWeek(num.value)">
+            <input #num type="number" min="1" max="{{weeks.length}}" value="{{selectedWeek.id}}" (change)="selectWeek(num.value)">
         </td>
     </tr>
     <tr class="info">
@@ -24,13 +24,13 @@
         <th>Факт</th>
     </tr>
     <template ngFor #day let-day [ngForOf]="days">
-        <tr *ngFor="let interval of intervals">
+        <tr *ngFor="let interval of INTERVALS">
             <td *ngIf="interval.index==1" rowspan="4" class="active">
                 {{day.name}}<br>
                 <span class="visible-lg">{{selectedWeek.getFormattedDate(day)}}</span>
             </td>
             <td class="active">{{interval}}</td>
-            <td></td>
+            <td>{{customers.length}}</td>
             <td></td>
             <td></td>
             <td></td>
