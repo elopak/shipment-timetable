@@ -25,8 +25,8 @@
         <th>Факт</th>
     </tr>
     <template ngFor #day let-day [ngForOf]="days">
-        <tr *ngFor="let interval of INTERVALS">
-            <td *ngIf="interval.index==1" rowspan="4" class="active">
+        <tr *ngFor="let interval of intervals">
+            <td *ngIf="interval.id==1" rowspan="4" class="active">
                 {{day.name}}<br>
                 <span class="visible-lg">{{selectedWeek.getFormattedDate(day)}}</span>
             </td>

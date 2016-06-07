@@ -3,7 +3,6 @@ import { Shipment } from '../classes/Shipment';
 import { WeekDayInterval } from '../classes/WeekDayInterval';
 import { Day } from '../classes/Day';
 import { Week } from '../classes/Week';
-import { DatePickerComponent } from '../components/DatePickerComponent';
 import { CustomerListService } from '../services/CustomerListService';
 import { Customer } from '../classes/Customer';
 import { Dispatcher } from '../classes/Dispatcher';
@@ -39,6 +38,7 @@ export class TimetableComponent implements OnInit {
     selectedWeek                      = Week.fromDate(TimetableComponent.CURRENT_DATE);
     selectedInterval: WeekDayInterval = null;
     days                              = Day.getDays();
+    intervals                         = TimetableComponent.INTERVALS;
     shipments: Shipment[];
     customers: Customer[];
     dispatchers: Dispatcher[];
@@ -54,8 +54,8 @@ export class TimetableComponent implements OnInit {
 
     loadShipments(): any {
         this.shipmentListService.get(this.selectedWeek.getStartTime()).subscribe(
-                list => this.shipments = list,
-                error => this.error = error
+            list => this.shipments = list,
+            error => this.error = error
         );
     }
 
@@ -63,8 +63,8 @@ export class TimetableComponent implements OnInit {
         //this.customers = [new Customer(1, "test")];
         this.dispatchers = [new Dispatcher(1, 'test dispatcher')];
         this.customerListService.get().subscribe(
-             list => this.customers = list,
-             error => this.error = error
+            list => this.customers = list,
+            error => this.error = error
         );
 
         /*this.dispatcherListService.get().subscribe(
