@@ -15,7 +15,8 @@ import { Interval } from '../classes/Interval';
 @Component({
     selector: 'timetable',
     templateUrl: 'app/templates/timetable.html',
-    directives: [DatePickerComponent]
+    directives: [],
+    providers: [CustomerListService, DispatcherListService, ShipmentListService]
 })
 export class TimetableComponent implements OnInit {
 
@@ -41,7 +42,7 @@ export class TimetableComponent implements OnInit {
     shipments: Shipment[];
     customers: Customer[];
     dispatchers: Dispatcher[];
-    errorMessage: string;
+    error: any;
 
     selectWeek(value: string): void {
         var i = parseInt(value);
@@ -51,21 +52,24 @@ export class TimetableComponent implements OnInit {
         this.loadShipments();
     }
 
-    loadShipments() {
-        this.shipmentListService.get(this.selectedWeek.getStartTime())
-            .subscribe(
+    loadShipments(): any {
+        this.shipmentListService.get(this.selectedWeek.getStartTime()).subscribe(
                 list => this.shipments = list,
-                error => this.errorMessage = <any>error);
+                error => this.error = error
+        );
     }
 
-    ngOnInit() {
-        this.customerListService.get()
-            .subscribe(
-                list => this.customers = list,
-                error => this.errorMessage = <any>error);
-        this.dispatcherListService.get()
-            .subscribe(
-                list => this.dispatchers = list,
-                error => this.errorMessage = <any>error);
+    ngOnInit(): any {
+        //this.customers = [new Customer(1, "test")];
+        this.dispatchers = [new Dispatcher(1, 'test dispatcher')];
+        this.customerListService.get().subscribe(
+             list => this.customers = list,
+             error => this.error = error
+        );
+
+        /*this.dispatcherListService.get().subscribe(
+         list => this.dispatchers = list,
+         error => this.error = error
+         );*/
     }
 }

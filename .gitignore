@@ -2,4 +2,4 @@
 *.map
 /app/*.js
 /app/*/*.js
-boot.js
+main.js
