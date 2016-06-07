@@ -10,11 +10,12 @@ import { ShipmentListService } from '../services/ShipmentListService';
 import { DispatcherListService } from '../services/DispatcherListService';
 import { Year } from '../classes/Year';
 import { Interval } from '../classes/Interval';
+import {AlertComponent} from 'ng2-bootstrap/ng2-bootstrap';
 
 @Component({
     selector: 'timetable',
     templateUrl: 'app/templates/timetable.html',
-    directives: [],
+    directives: [AlertComponent],
     providers: [CustomerListService, DispatcherListService, ShipmentListService]
 })
 export class TimetableComponent implements OnInit {
