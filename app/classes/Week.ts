@@ -7,10 +7,10 @@ import { TimetableComponent } from '../components/TimetableComponent';
 export class Week extends Indexed {
     year: Year;
 
-    constructor(index: number, year: Year) {
-        super(index);
+    constructor(id: number, year: Year) {
+        super(id);
         this.year = year;
-    }
+    }    
 
     public static fromDate(date: Date): Week {
         var newYear   = new Date(date.getFullYear(), 0, 1);
@@ -33,6 +33,14 @@ export class Week extends Indexed {
         }
         return new Week(weekNumber, Year.fromDate(date));
     }
+    
+    getNextWeek(): Week {
+        return new Week(this.id + 1, this.year);
+    }
+
+    getPreviousWeek(): Week {
+        return new Week(this.id - 1, this.year);
+    }
 
     getDate(day: Day): Date {
         var firstDay = this.year.getStartDate();
@@ -46,6 +54,10 @@ export class Week extends Indexed {
 
     getStartDate(): Date {
         return this.getDate(Day.MONDAY);
+    }
+
+    public toString(): string {
+        return this.id.toString();
     }
 
     getStartTime(): Time {

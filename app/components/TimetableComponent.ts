@@ -10,12 +10,13 @@ import { ShipmentListService } from '../services/ShipmentListService';
 import { DispatcherListService } from '../services/DispatcherListService';
 import { Year } from '../classes/Year';
 import { Interval } from '../classes/Interval';
-import {AlertComponent} from 'ng2-bootstrap/ng2-bootstrap';
+import { TYPEAHEAD_DIRECTIVES, BUTTON_DIRECTIVES } from 'ng2-bootstrap/ng2-bootstrap';
+import { CORE_DIRECTIVES, FORM_DIRECTIVES } from '@angular/common';
 
 @Component({
     selector: 'timetable',
     templateUrl: 'app/templates/timetable.html',
-    directives: [AlertComponent],
+    directives: [TYPEAHEAD_DIRECTIVES, CORE_DIRECTIVES, FORM_DIRECTIVES, BUTTON_DIRECTIVES],
     providers: [CustomerListService, DispatcherListService, ShipmentListService]
 })
 export class TimetableComponent implements OnInit {
@@ -36,6 +37,9 @@ export class TimetableComponent implements OnInit {
     public static YEAR         = Year.fromDate(TimetableComponent.CURRENT_DATE);
 
     weeks                             = TimetableComponent.YEAR.getWeeks();
+    currentWeek                       = Week.fromDate(TimetableComponent.CURRENT_DATE);
+    nextWeek                          = this.currentWeek.getNextWeek();
+    previousWeek                      = this.currentWeek.getPreviousWeek();
     selectedWeek                      = Week.fromDate(TimetableComponent.CURRENT_DATE);
     selectedInterval: WeekDayInterval = null;
     days                              = Day.getDays();
@@ -52,6 +56,20 @@ export class TimetableComponent implements OnInit {
         this.selectedWeek = this.weeks[i];
         this.loadShipments();
     }
+
+    selectPreviousWeek(): void {
+        this.selectedWeek = this.previousWeek;
+    }
+
+    selectCurrentWeek(): void {
+        this.selectedWeek = this.currentWeek;
+    }
+
+    selectNextWeek(): void {
+        this.selectedWeek = this.nextWeek;
+    }
+
+
 
     loadShipments(): any {
         this.shipmentListService.get(this.selectedWeek.getStartTime()).subscribe(

@@ -1,10 +1,13 @@
-<customer-input></customer-input>
-<alert type="info">ng2-bootstrap hello world!</alert>
+
 <table class="table table-bordered table-hover table-schedule">
     <tr>
         <td colspan="14">
-            Неделя
-            <input #num type="number" min="1" max="{{weeks.length}}" value="{{selectedWeek.id}}" (change)="selectWeek(num.value)">
+            Неделя {{selectedWeek}}
+            <div class="btn-group">
+                <label class="btn btn-primary" [(ngModel)]="selectedWeek" btnRadio="previousWeek">{{previousWeek}}</label>
+                <label class="btn btn-primary" [(ngModel)]="selectedWeek" btnRadio="currentWeek">{{currentWeek}}</label>
+                <label class="btn btn-primary" [(ngModel)]="selectedWeek" btnRadio="nextWeek">{{nextWeek}}</label>
+            </div>
         </td>
     </tr>
     <tr class="info">
