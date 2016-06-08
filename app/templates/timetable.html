@@ -1,12 +1,30 @@
-
-<table class="table table-bordered table-hover table-schedule">
+<div *ngIf="error" class="alert alert-danger" role="alert">{{error}}</div>
+<table class="table table-bordered table-schedule">
     <tr>
         <td colspan="14">
-            Неделя {{selectedWeek}}
-            <div class="btn-group">
-                <label class="btn btn-primary" [(ngModel)]="selectedWeek" btnRadio="previousWeek">{{previousWeek}}</label>
-                <label class="btn btn-primary" [(ngModel)]="selectedWeek" btnRadio="currentWeek">{{currentWeek}}</label>
-                <label class="btn btn-primary" [(ngModel)]="selectedWeek" btnRadio="nextWeek">{{nextWeek}}</label>
+            <div class="btn-toolbar" role="toolbar">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default" (click)="lgModal.show()">
+                        <span class="glyphicon glyphicon-plus"></span> Новая запись
+                    </button>
+                    <button type="button" class="btn btn-default">
+                        <span class="glyphicon glyphicon-remove"></span> Удалить
+                    </button>
+                    <button type="button" class="btn btn-default">
+                        <span class="glyphicon glyphicon-pencil"></span> Редактировать
+                    </button>
+                </div>
+                <div class="btn-group" role="group">
+                    <button class="btn btn-default" [(ngModel)]="selectedWeek" btnRadio="previousWeek">
+                        {{previousWeek}}
+                    </button>
+                    <button class="btn btn-default" [(ngModel)]="selectedWeek" btnRadio="currentWeek">
+                        {{currentWeek}}
+                    </button>
+                    <button class="btn btn-default" [(ngModel)]="selectedWeek" btnRadio="nextWeek">
+                        {{nextWeek}}
+                    </button>
+                </div>
             </div>
         </td>
     </tr>
@@ -31,7 +49,7 @@
     <template ngFor #day let-day [ngForOf]="days">
         <tr *ngFor="let interval of intervals">
             <td *ngIf="interval.id==1" rowspan="4" class="active">
-                {{day.name}}<br>
+                {{day.toString()}}<br>
                 <span class="visible-lg">{{selectedWeek.getFormattedDate(day)}}</span>
             </td>
             <td class="active">{{interval}}</td>
@@ -49,4 +67,42 @@
         </tr>
     </template>
 </table>
+<div bsModal #lgModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" (click)="lgModal.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Новая запись</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+
+                        <label for="new-day">День</label>
+                        <select class="form-control" id="new-day" autofocus>
+                            <option *ngFor="let day of days">{{day}}</option>
+                        </select>
+
+                        <label for="new-interval">Окно</label>
+                        <select class="form-control" id="new-interval">
+                            <option *ngFor="let interval of intervals">{{interval}}</option>
+                        </select>
+
+                        <label for="new-customer">Клиент</label>
+                        <select class="form-control" id="new-customer">
+                            <option *ngFor="let customer of customers">{{customer.toString()}}</option>
+                        </select>
+
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" (click)="lgModal.hide()" aria-label="Close">Отмена</button>
+                <button type="button" (click)="saveShipment();lgModal.hide()" aria-label="Close">ОК </button>
+            </div>
+        </div>
+    </div>
+</div>
 

@@ -1,8 +1,10 @@
 import { Indexed } from './Indexed';
+import { Shipment } from './Shipment';
 
 export class Interval extends Indexed{
     startHour: number;
     endHour: number;
+    shipments: Shipment[];
 
     constructor(index: number) {
         index = Math.floor(index);

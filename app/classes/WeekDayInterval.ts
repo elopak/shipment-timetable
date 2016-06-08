@@ -1,6 +1,5 @@
 import { Interval } from './Interval';
 import { Day } from './Day';
-import { Time } from './Time';
 import { Week } from './Week';
 
 export class WeekDayInterval extends Interval {
@@ -13,7 +12,7 @@ export class WeekDayInterval extends Interval {
         this.day = day;
     }
     
-    getStartTime(): Time {
-        return this.week.getStartTime();
+    getStartDate(): Date {
+        return this.week.getStartDate();
     }
 }

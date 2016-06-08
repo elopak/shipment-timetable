@@ -1,8 +1,9 @@
 import { Indexed } from './Indexed';
 import { Day } from './Day';
 import { Year } from './Year';
-import { Time } from './Time';
-import { TimetableComponent } from '../components/TimetableComponent';
+import * as moment from 'moment';
+
+moment.locale('ru');
 
 export class Week extends Indexed {
     year: Year;
@@ -10,7 +11,7 @@ export class Week extends Indexed {
     constructor(id: number, year: Year) {
         super(id);
         this.year = year;
-    }    
+    }
 
     public static fromDate(date: Date): Week {
         var newYear   = new Date(date.getFullYear(), 0, 1);
@@ -33,7 +34,7 @@ export class Week extends Indexed {
         }
         return new Week(weekNumber, Year.fromDate(date));
     }
-    
+
     getNextWeek(): Week {
         return new Week(this.id + 1, this.year);
     }
@@ -43,29 +44,29 @@ export class Week extends Indexed {
     }
 
     getDate(day: Day): Date {
-        var firstDay = this.year.getStartDate();
-        var offset   = firstDay.getTimezoneOffset();
-        firstDay.setDate(firstDay.getDate() + 4 - (firstDay.getDay() || 7));
-        firstDay.setTime(firstDay.getTime() + 7 * Day.MILLISECONDS * (this.id + (this.year.id == firstDay.getFullYear() ? -1 : 0 )));
-        firstDay.setTime(firstDay.getTime() + (firstDay.getTimezoneOffset() - offset) * 60 * 1000);
-        firstDay.setDate(firstDay.getDate() - 3 + day.id - 1);
-        return firstDay;
+        var j1   = new Date(Year.CURRENT_YEAR.id, 0, 10, 0, 0, 0),
+            j2   = new Date(Year.CURRENT_YEAR.id, 0, 4, 0, 0, 0),
+            mon1 = j2.getTime() - j1.getDay() * Day.MILLISECONDS;
+        return new Date(mon1 + ((this.id - 1) * 7 + (day.id - 1)) * Day.MILLISECONDS);
+    }
+
+    getDateForNumber(day: number): Date {
+        var j1   = new Date(Year.CURRENT_YEAR.id, 0, 10, 0, 0, 0),
+            j2   = new Date(Year.CURRENT_YEAR.id, 0, 4, 0, 0, 0),
+            mon1 = j2.getTime() - j1.getDay() * Day.MILLISECONDS;
+        return new Date(mon1 + ((this.id - 1) * 7 + (day - 1)) * Day.MILLISECONDS);
     }
 
     getStartDate(): Date {
         return this.getDate(Day.MONDAY);
     }
 
+    getEndDate(): Date {
+        return this.getDateForNumber(7);
+    }
+
     public toString(): string {
         return this.id.toString();
-    }
-
-    getStartTime(): Time {
-        return Time.fromDate(this.getStartDate());
-    }
-
-    getEndDate(): Date {
-        return this.getDate(Day.SUNDAY);
     }
 
     getFormattedRange(): string {
@@ -73,7 +74,7 @@ export class Week extends Indexed {
     }
 
     getFormattedDate(day: Day): string {
-        return this.getDate(day).toLocaleDateString(TimetableComponent.LOCALE);
+        return moment(this.getDate(day)).format('D MMMM');
     }
 
 }

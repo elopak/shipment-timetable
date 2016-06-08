@@ -1,7 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { Shipment } from '../classes/Shipment';
 import { WeekDayInterval } from '../classes/WeekDayInterval';
-import { Day } from '../classes/Day';
 import { Week } from '../classes/Week';
 import { CustomerListService } from '../services/CustomerListService';
 import { Customer } from '../classes/Customer';
@@ -10,20 +9,42 @@ import { ShipmentListService } from '../services/ShipmentListService';
 import { DispatcherListService } from '../services/DispatcherListService';
 import { Year } from '../classes/Year';
 import { Interval } from '../classes/Interval';
-import { TYPEAHEAD_DIRECTIVES, BUTTON_DIRECTIVES } from 'ng2-bootstrap/ng2-bootstrap';
+import {
+    TYPEAHEAD_DIRECTIVES,
+    BUTTON_DIRECTIVES,
+    MODAL_DIRECTVES,
+    BS_VIEW_PROVIDERS
+} from 'ng2-bootstrap/ng2-bootstrap';
 import { CORE_DIRECTIVES, FORM_DIRECTIVES } from '@angular/common';
+import * as moment from 'moment';
+import { ShipmentSaveService } from '../services/ShipmentSaveService';
+import { Day } from '../classes/Day';
 
 @Component({
     selector: 'timetable',
     templateUrl: 'app/templates/timetable.html',
-    directives: [TYPEAHEAD_DIRECTIVES, CORE_DIRECTIVES, FORM_DIRECTIVES, BUTTON_DIRECTIVES],
-    providers: [CustomerListService, DispatcherListService, ShipmentListService]
+    directives: [
+        TYPEAHEAD_DIRECTIVES,
+        CORE_DIRECTIVES,
+        FORM_DIRECTIVES,
+        BUTTON_DIRECTIVES,
+        MODAL_DIRECTVES
+    ],
+    providers: [
+        CustomerListService,
+        DispatcherListService,
+        ShipmentListService,
+        ShipmentSaveService
+    ],
+    viewProviders: [BS_VIEW_PROVIDERS]
 })
 export class TimetableComponent implements OnInit {
 
     constructor(private customerListService: CustomerListService,
                 private shipmentListService: ShipmentListService,
-                private dispatcherListService: DispatcherListService) {
+                private shipmentSaveService: ShipmentSaveService,
+                private dispatcherListService: DispatcherListService,
+                private viewContainerRef: ViewContainerRef) {
     }
 
     public static INTERVALS    = [
@@ -42,53 +63,60 @@ export class TimetableComponent implements OnInit {
     previousWeek                      = this.currentWeek.getPreviousWeek();
     selectedWeek                      = Week.fromDate(TimetableComponent.CURRENT_DATE);
     selectedInterval: WeekDayInterval = null;
-    days                              = Day.getDays();
+    days                              = Day.getWorkingDays();
     intervals                         = TimetableComponent.INTERVALS;
     shipments: Shipment[];
     customers: Customer[];
     dispatchers: Dispatcher[];
     error: any;
+    newShipment                       = new Shipment(this.currentWeek);
 
-    selectWeek(value: string): void {
-        var i = parseInt(value);
-        if (!i || i < 1) i = 1;
-        else if (i > this.weeks.length) i = this.weeks.length;
-        this.selectedWeek = this.weeks[i];
+    selectWeek(week: Week): void {
+        this.selectedWeek = week;
         this.loadShipments();
     }
 
     selectPreviousWeek(): void {
-        this.selectedWeek = this.previousWeek;
+        this.selectWeek(this.previousWeek);
     }
 
     selectCurrentWeek(): void {
-        this.selectedWeek = this.currentWeek;
+        this.selectWeek(this.currentWeek);
     }
 
     selectNextWeek(): void {
-        this.selectedWeek = this.nextWeek;
+        this.selectWeek(this.nextWeek);
     }
 
-
-
     loadShipments(): any {
-        this.shipmentListService.get(this.selectedWeek.getStartTime()).subscribe(
-            list => this.shipments = list,
+        this.shipmentListService.get(this.selectedWeek).subscribe(
+            (shipments: Shipment[]) => {
+                for (let day of this.days){
+                    for (let interval of day.intervals) {
+                        interval.shipments = [];
+                        for (let shipment of shipments) {
+                            if (shipment.day.equals(day)) interval.shipments.push(shipment);
+                        }
+                    }
+                }
+            },
             error => this.error = error
         );
     }
 
     ngOnInit(): any {
-        //this.customers = [new Customer(1, "test")];
-        this.dispatchers = [new Dispatcher(1, 'test dispatcher')];
         this.customerListService.get().subscribe(
             list => this.customers = list,
             error => this.error = error
         );
+        this.dispatcherListService.get().subscribe(
+            list => this.dispatchers = list,
+            error => this.error = error
+        );
+        this.selectCurrentWeek();
+    }
 
-        /*this.dispatcherListService.get().subscribe(
-         list => this.dispatchers = list,
-         error => this.error = error
-         );*/
+    saveShipment(): void {
+        this.shipmentSaveService.post(this.newShipment).subscribe(this.loadShipments);
     }
 }

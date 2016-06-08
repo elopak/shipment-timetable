@@ -1,40 +1,43 @@
 import { Day } from './Day';
 import { Interval } from './Interval';
-import { WeekDayInterval } from './WeekDayInterval';
-import { Indexed } from './Indexed';
-import { Time } from './Time';
 import { Week } from './Week';
 import { TimetableComponent } from '../components/TimetableComponent';
 
-export class Shipment extends Indexed {
+export class Shipment {
+    week: Week;
+    day: Day;
     customerId: number;
     dispatcherId: number;
     telephone: number;
     plannedPallets: number;
     actualPallets: number;
-    created: Time;
-    edited: Time;
-    plannedLoad: Time;
-    arrived: Time;
-    loaded: Time;
+    created: Date;
+    edited: Date;
+    plannedLoad: number;
+    arrived: number;
+    loaded: number;
 
     ticket: string;
     vehicle: string;
     driver: string;
     comments: string;
 
+    constructor(week: Week){
+        this.week = week;
+    }
+
     getActualInterval(): Interval {
         if (!this.loaded) return null;
         for (var interval of TimetableComponent.INTERVALS) {
-            var loadHour = this.loaded.getHour();
-            if (loadHour >= interval.startHour && loadHour <= interval.endHour) return interval;
+            if (this.loaded >= interval.startHour && this.loaded <= interval.endHour) return interval;
         }
         return null;
     }
 
     getPlannedInterval(): Interval {
-        var date = this.plannedLoad.getDate();
-        return new WeekDayInterval(Week.fromDate(date), Day.fromDate(date), Interval.fromDate(date));
+        for (var interval of TimetableComponent.INTERVALS) {
+            if (this.plannedLoad >= interval.startHour && this.plannedLoad <= interval.endHour) return interval;
+        }
     }
 
     isCompleted(): boolean {
@@ -42,7 +45,7 @@ export class Shipment extends Indexed {
     }
 
     isOnTime(): boolean {
-        return this.getActualInterval() === this.getPlannedInterval();
+        return this.getActualInterval().equals(this.getPlannedInterval());
     }
 
 }

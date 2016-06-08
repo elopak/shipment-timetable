@@ -1,24 +1,31 @@
 import { IndexedNamed } from './IndexedNamed';
+import { Shipment } from './Shipment';
+import { Interval } from './Interval';
 
 export class Day extends IndexedNamed {
     public static MILLISECONDS = 24 * 60 * 60 * 1000;
-    public static MONDAY       = new Day(1, 'Пн');
-    public static TUESDAY      = new Day(2, 'Вт');
-    public static WEDNESDAY    = new Day(3, 'Ср');
-    public static THURSDAY     = new Day(4, 'Чт');
-    public static FRIDAY       = new Day(5, 'Пт');
-    public static SATURDAY     = new Day(6, 'Сб');
-    public static SUNDAY       = new Day(7, 'Вс');
+    public static MONDAY       = new Day(1, 'Понедельник');
+    public static TUESDAY      = new Day(2, 'Вторник');
+    public static WEDNESDAY    = new Day(3, 'Среда');
+    public static THURSDAY     = new Day(4, 'Четверг');
+    public static FRIDAY       = new Day(5, 'Пятница');
+    public static SATURDAY     = new Day(6, 'Суббота');
+    public static SUNDAY       = new Day(7, 'Воскресенье');
+    
+    intervals = [
+        new Interval(1),
+        new Interval(2),
+        new Interval(3),
+        new Interval(4)
+    ];
 
-    public static getDays(): Day[] {
+    public static getWorkingDays(): Day[] {
         return [
             Day.MONDAY,
             Day.TUESDAY,
             Day.WEDNESDAY,
             Day.THURSDAY,
-            Day.FRIDAY,
-            Day.SATURDAY,
-            Day.SUNDAY
+            Day.FRIDAY
         ];
     }
 
@@ -27,6 +34,10 @@ export class Day extends IndexedNamed {
     }
 
     public static fromDate(date: Date): Day {
-        return Day.getDays()[date.getDay() - 1];
+        return Day.getWorkingDays()[date.getDay() - 1];
+    }
+    
+    equals(day: Day): boolean{
+        return day.id === this.id;
     }
 }
