@@ -69,7 +69,7 @@ export class TimetableComponent implements OnInit {
     customers: Customer[];
     dispatchers: Dispatcher[];
     error: any;
-    newShipment                       = new Shipment(this.currentWeek);
+    newShipment: Shipment                       = new Shipment(this.currentWeek);
 
     selectWeek(week: Week): void {
         this.selectedWeek = week;
@@ -91,6 +91,7 @@ export class TimetableComponent implements OnInit {
     loadShipments(): any {
         this.shipmentListService.get(this.selectedWeek).subscribe(
             (shipments: Shipment[]) => {
+                this.shipments = shipments;
                 for (let day of this.days){
                     for (let interval of day.intervals) {
                         interval.shipments = [];
@@ -105,6 +106,8 @@ export class TimetableComponent implements OnInit {
     }
 
     ngOnInit(): any {
+        this.newShipment.plannedLoad = new Interval(1);
+        this.newShipment.plannedPallets = 33;
         this.customerListService.get().subscribe(
             list => this.customers = list,
             error => this.error = error

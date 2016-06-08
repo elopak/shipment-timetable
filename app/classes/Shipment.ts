@@ -2,18 +2,20 @@ import { Day } from './Day';
 import { Interval } from './Interval';
 import { Week } from './Week';
 import { TimetableComponent } from '../components/TimetableComponent';
+import { Dispatcher } from './Dispatcher';
+import { Customer } from './Customer';
 
 export class Shipment {
     week: Week;
     day: Day;
-    customerId: number;
-    dispatcherId: number;
+    customer: Customer;
+    dispatcher: Dispatcher;
     telephone: number;
     plannedPallets: number;
     actualPallets: number;
     created: Date;
     edited: Date;
-    plannedLoad: number;
+    plannedLoad: Interval;
     arrived: number;
     loaded: number;
 
@@ -34,18 +36,12 @@ export class Shipment {
         return null;
     }
 
-    getPlannedInterval(): Interval {
-        for (var interval of TimetableComponent.INTERVALS) {
-            if (this.plannedLoad >= interval.startHour && this.plannedLoad <= interval.endHour) return interval;
-        }
-    }
-
     isCompleted(): boolean {
         return this.loaded != null;
     }
 
     isOnTime(): boolean {
-        return this.getActualInterval().equals(this.getPlannedInterval());
+        return this.getActualInterval().equals(this.plannedLoad);
     }
 
 }
