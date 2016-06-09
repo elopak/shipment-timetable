@@ -4,8 +4,9 @@ import { Week } from './Week';
 import { TimetableComponent } from '../components/TimetableComponent';
 import { Dispatcher } from './Dispatcher';
 import { Customer } from './Customer';
+import { Indexed } from './Indexed';
 
-export class Shipment {
+export class Shipment extends Indexed {
     week: Week;
     day: Day;
     customer: Customer;
@@ -15,7 +16,7 @@ export class Shipment {
     actualPallets: number;
     created: Date;
     edited: Date;
-    plannedLoad: Interval;
+    plannedInterval: Interval;
     arrived: number;
     loaded: number;
 
@@ -24,8 +25,14 @@ export class Shipment {
     driver: string;
     comments: string;
 
-    constructor(week: Week){
-        this.week = week;
+    constructor(week: Week) {
+        super(0);
+        this.week            = TimetableComponent.CURRENT_WEEK;
+        this.day             = Day.MONDAY;
+        this.plannedInterval = new Interval(1);
+        this.plannedPallets  = Interval.MAX_PALLETS;
+        this.customer        = new Customer(1, null);
+        this.dispatcher      = new Dispatcher(1, null);
     }
 
     getActualInterval(): Interval {
@@ -41,7 +48,7 @@ export class Shipment {
     }
 
     isOnTime(): boolean {
-        return this.getActualInterval().equals(this.plannedLoad);
+        return this.getActualInterval().equals(this.plannedInterval);
     }
 
 }

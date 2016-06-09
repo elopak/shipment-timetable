@@ -19,7 +19,7 @@ export class DispatcherListService {
             for (var i = 0; i < array.length; i++){
                 dispatchers.push(new Dispatcher(array[i].id, array[i].name));
             }
-            return dispatchers;
+            return dispatchers.sort(Dispatcher.compare);
         });
     }
 }

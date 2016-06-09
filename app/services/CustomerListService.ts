@@ -19,7 +19,7 @@ export class CustomerListService {
                 var customer: Customer = array[i];
                 customers.push(new Customer(customer.id, customer.name));
             }            
-            return customers;
+            return customers.sort(Customer.compare);
         });
     }
 }

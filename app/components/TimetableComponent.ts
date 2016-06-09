@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { Shipment } from '../classes/Shipment';
-import { WeekDayInterval } from '../classes/WeekDayInterval';
 import { Week } from '../classes/Week';
 import { CustomerListService } from '../services/CustomerListService';
 import { Customer } from '../classes/Customer';
@@ -16,9 +15,9 @@ import {
     BS_VIEW_PROVIDERS
 } from 'ng2-bootstrap/ng2-bootstrap';
 import { CORE_DIRECTIVES, FORM_DIRECTIVES } from '@angular/common';
-import * as moment from 'moment';
 import { ShipmentSaveService } from '../services/ShipmentSaveService';
 import { Day } from '../classes/Day';
+import { ShipmentRemoveService } from '../services/ShipmentRemoveService';
 
 @Component({
     selector: 'timetable',
@@ -34,7 +33,8 @@ import { Day } from '../classes/Day';
         CustomerListService,
         DispatcherListService,
         ShipmentListService,
-        ShipmentSaveService
+        ShipmentSaveService,
+        ShipmentRemoveService,
     ],
     viewProviders: [BS_VIEW_PROVIDERS]
 })
@@ -43,37 +43,39 @@ export class TimetableComponent implements OnInit {
     constructor(private customerListService: CustomerListService,
                 private shipmentListService: ShipmentListService,
                 private shipmentSaveService: ShipmentSaveService,
+                private shipmentRemoveService: ShipmentRemoveService,
                 private dispatcherListService: DispatcherListService,
                 private viewContainerRef: ViewContainerRef) {
     }
 
-    public static INTERVALS    = [
-        new Interval(1),
-        new Interval(2),
-        new Interval(3),
-        new Interval(4)
-    ];
+    public static INTERVALS    = Interval.INTERVALS;
     public static LOCALE       = 'ru-RU';
     public static CURRENT_DATE = new Date();
     public static YEAR         = Year.fromDate(TimetableComponent.CURRENT_DATE);
+    public static CURRENT_WEEK = Week.fromDate(TimetableComponent.CURRENT_DATE);
 
-    weeks                             = TimetableComponent.YEAR.getWeeks();
-    currentWeek                       = Week.fromDate(TimetableComponent.CURRENT_DATE);
-    nextWeek                          = this.currentWeek.getNextWeek();
-    previousWeek                      = this.currentWeek.getPreviousWeek();
-    selectedWeek                      = Week.fromDate(TimetableComponent.CURRENT_DATE);
-    selectedInterval: WeekDayInterval = null;
-    days                              = Day.getWorkingDays();
-    intervals                         = TimetableComponent.INTERVALS;
-    shipments: Shipment[];
-    customers: Customer[];
-    dispatchers: Dispatcher[];
-    error: any;
-    newShipment: Shipment                       = new Shipment(this.currentWeek);
+    locale                     = TimetableComponent.LOCALE;
+    currentWeek                = TimetableComponent.CURRENT_WEEK;
+    nextWeek                   = this.currentWeek.getNextWeek();
+    previousWeek               = this.currentWeek.getPreviousWeek();
+    selectedWeek               = Week.fromDate(TimetableComponent.CURRENT_DATE);
+    weeks: Week[]              = [this.previousWeek, this.currentWeek, this.nextWeek];
+    days: Day[]                = Day.getWorkingDays();
+    today: Day                 = Day.fromDate(TimetableComponent.CURRENT_DATE);
+    selectedDay: Day           = Day.MONDAY;
+    intervals                  = TimetableComponent.INTERVALS;
+    customers: Customer[]      = [];
+    dispatchers: Dispatcher[]  = [];
+    error: any                 = null;
+    newShipment: Shipment      = new Shipment(this.currentWeek);
+    availablePallets: number[] = [];
+    selectedShipment: Shipment;
+    selectedInterval: Interval;
 
     selectWeek(week: Week): void {
         this.selectedWeek = week;
         this.loadShipments();
+        this.deselect();
     }
 
     selectPreviousWeek(): void {
@@ -88,15 +90,71 @@ export class TimetableComponent implements OnInit {
         this.selectWeek(this.nextWeek);
     }
 
+    selectShipment(shipment: Shipment, interval?: Interval, day?: Day): void {
+        this.selectedShipment = shipment;
+        this.selectedInterval = interval || shipment.plannedInterval;
+        if (day) this.selectDay(day);
+        this.prepareNewShipment();
+    }
+
+    selectDay(day: Day): void {
+        this.selectedDay = day;
+    }
+
+    deselect(): void {
+        this.selectedInterval = null;
+        this.selectedShipment = null;
+        this.selectedDay      = null;
+    }
+
+    selectInterval(interval: Interval, day?: Day): void {
+        if (this.isIntervalAvailable(interval, day)) {
+            this.selectedInterval = interval;
+            this.selectedShipment = null;
+            if (day) this.selectDay(day);
+            this.prepareNewShipment();
+        }
+    }
+
+    prepareNewShipment(): void {
+        if (!this.selectedInterval) this.availablePallets = TimetableComponent.getRange(Interval.MAX_PALLETS);
+        this.availablePallets            = TimetableComponent.getRange(this.selectedInterval.getAvailablePallets());
+        this.newShipment.week            = this.selectedWeek;
+        this.newShipment.day             = this.selectedDay;
+        this.newShipment.plannedInterval = this.selectedInterval;
+    }
+
+    public static getRange(n: number): number[] {
+        return new Array(n).join().split(',').map((item, index) => ++index).reverse();
+    }
+
+    validate(): void {
+        var tel = parseInt(String(this.newShipment.telephone).substr(0, 10).replace(/[^0-9]/gi, ''));
+        if (isNaN(tel)) this.newShipment.telephone = null;
+        else this.newShipment.telephone = tel;
+    }
+
+    isSelectedIntervalAvailable(): boolean {
+        return this.isIntervalAvailable(this.selectedInterval);
+    }
+
+    isIntervalAvailable(interval: Interval, day?: Day): boolean {
+        if (!day) day = this.selectedDay;
+        return interval && interval.isAvailable()
+            && this.selectedWeek.getDate(day).getTime() > TimetableComponent.CURRENT_DATE.getTime()
+    }
+
     loadShipments(): any {
-        this.shipmentListService.get(this.selectedWeek).subscribe(
+        this.shipmentListService.get(this.selectedWeek, this.customers, this.dispatchers).subscribe(
             (shipments: Shipment[]) => {
-                this.shipments = shipments;
-                for (let day of this.days){
+                this.days = Day.getWorkingDays();
+                for (let day of this.days) {
                     for (let interval of day.intervals) {
                         interval.shipments = [];
                         for (let shipment of shipments) {
-                            if (shipment.day.equals(day)) interval.shipments.push(shipment);
+                            if (shipment.day.equals(day) && shipment.plannedInterval.equals(interval)) {
+                                interval.shipments.push(shipment);
+                            }
                         }
                     }
                 }
@@ -106,20 +164,54 @@ export class TimetableComponent implements OnInit {
     }
 
     ngOnInit(): any {
-        this.newShipment.plannedLoad = new Interval(1);
-        this.newShipment.plannedPallets = 33;
-        this.customerListService.get().subscribe(
-            list => this.customers = list,
-            error => this.error = error
-        );
-        this.dispatcherListService.get().subscribe(
-            list => this.dispatchers = list,
-            error => this.error = error
-        );
-        this.selectCurrentWeek();
+        this.newShipment.week            = this.currentWeek;
+        this.newShipment.day             = Day.MONDAY;
+        this.newShipment.plannedInterval = new Interval(1);
+        this.newShipment.plannedPallets  = 33;
+        this.loadCustomers();
     }
 
-    saveShipment(): void {
-        this.shipmentSaveService.post(this.newShipment).subscribe(this.loadShipments);
+    loadCustomers(): void {
+        this.customerListService.get().subscribe(
+            function (list) {
+                this.customers = list;
+                this.loadDispatchers();
+            },
+            error => this.error = error
+        );
+    }
+
+    loadDispatchers(): void {
+        this.dispatcherListService.get().subscribe(
+            function (list) {
+                this.dispatchers = list;
+                this.selectCurrentWeek();
+            },
+            error => this.error = error
+        );
+    }
+
+    saveShipment(): any {
+        var s = this.newShipment;
+        var o = {
+            week: s.week.id,
+            day: s.day.id,
+            customerId: s.customer.id,
+            dispatcherId: s.dispatcher.id,
+            plannedInterval: s.plannedInterval.id,
+            plannedPallets: s.plannedPallets,
+            vehicle: s.vehicle,
+            driver: s.driver,
+            telephone: s.telephone
+        };
+        this.shipmentSaveService
+            .post(o)
+            .subscribe(() => this.loadShipments());
+    }
+
+    removeSelectedShipment(): any {
+        if (this.selectedShipment) this.shipmentRemoveService
+            .post(this.selectedShipment)
+            .subscribe(() => this.loadShipments());
     }
 }
