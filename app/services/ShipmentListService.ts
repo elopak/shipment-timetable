@@ -39,6 +39,7 @@ export class ShipmentListService {
                 let t1 = new Date(shipment.created).getTime();
                 let t2 = shipment.week.getDate(shipment.day).getTime();
                 shipment.urgent = (Math.abs(t1 - t2) < Day.MILLISECONDS);
+                //shipment.comments = shipment.comments.replace(/\n/gi, '</p><p>');
                 shipments.push(shipment);
             }
             return shipments;

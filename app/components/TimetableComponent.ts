@@ -20,6 +20,7 @@ import { Day } from '../classes/Day';
 import { ShipmentRemoveService } from '../services/ShipmentRemoveService';
 import { User } from '../classes/User';
 import { Hour } from '../classes/Hour';
+import { ShipmentEditService } from '../services/ShipmentEditService';
 
 @Component({
     selector: 'timetable',
@@ -37,6 +38,7 @@ import { Hour } from '../classes/Hour';
         ShipmentListService,
         ShipmentSaveService,
         ShipmentRemoveService,
+        ShipmentEditService
     ],
     viewProviders: [BS_VIEW_PROVIDERS]
 })
@@ -47,6 +49,7 @@ export class TimetableComponent implements OnInit {
                 private shipmentSaveService: ShipmentSaveService,
                 private shipmentRemoveService: ShipmentRemoveService,
                 private dispatcherListService: DispatcherListService,
+                private shipmentEditService: ShipmentEditService,
                 private viewContainerRef: ViewContainerRef) {
     }
 
@@ -248,11 +251,12 @@ export class TimetableComponent implements OnInit {
         if (!this.selectedShipment) return;
         var s = this.selectedShipment;
         var o = {
+            id: s.id,
             arrived: s.arrived,
             loaded: s.loaded,
             actualPallets: s.actualPallets
         };
-        this.shipmentSaveService
+        this.shipmentEditService
             .post(o)
             .subscribe(() => this.loadShipments());
     }
@@ -262,9 +266,9 @@ export class TimetableComponent implements OnInit {
         var s = this.selectedShipment;
         var o = {
             id: s.id,
-            comment: s.comments + '<br>' + this.comment
+            comments: (s.comments || '') + '\n' + this.user + ': ' + this.comment
         };
-        this.shipmentSaveService
+        this.shipmentEditService
             .post(o)
             .subscribe(() => this.loadShipments());
     }
