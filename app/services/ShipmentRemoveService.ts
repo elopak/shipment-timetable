@@ -12,8 +12,8 @@ export class ShipmentRemoveService {
 
     private url = Paths.BACKEND + 'remove_shipment';
 
-    post(shipment: Shipment): Observable<any> {
-        let body = JSON.stringify({ id: shipment.id });
+    post(id: number): Observable<any> {
+        let body = JSON.stringify({ id: id });
         let headers = new Headers({ 'Content-Type': 'application/json' });
         let options = new RequestOptions({ headers: headers });
         return this.http.post(this.url, body, options).map(res => res).catch(e => console.log(e));

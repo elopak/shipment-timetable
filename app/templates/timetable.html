@@ -1,11 +1,11 @@
 <div *ngIf="error" class="alert alert-danger" role="alert">{{error}}</div>
-{{selectedShipment&&selectedShipment.id}}
 <table class="table table-bordered table-schedule">
     <tr>
         <td colspan="14">
             <div class="btn-toolbar" role="toolbar">
                 <div class="btn-group" role="group">
                     <button
+                            *ngIf="user==users[0]"
                             type="button"
                             class="btn btn-default"
                             (click)="dialogAddShipment.show()"
@@ -13,26 +13,55 @@
                         <span class="glyphicon glyphicon-plus"></span> Добавить запись
                     </button>
                     <button
+                            *ngIf="user==users[0]"
                             type="button"
                             class="btn btn-default"
-                            [disabled]="!selectedShipment" (click)="removeSelectedShipment()">
+                            [disabled]="!selectedShipment"
+                            (click)="dialogRemoveShipment.show()">
                         <span class="glyphicon glyphicon-remove"></span> Удалить
                     </button>
-                    <button type="button" class="btn btn-default" [disabled]="!selectedShipment">
+                    <button
+                            *ngIf="user==users[0]"
+                            type="button"
+                            class="btn btn-default"
+                            [disabled]="!selectedShipment"
+                            (click)="dialogEditShipment.show()">
                         <span class="glyphicon glyphicon-pencil"></span> Редактировать
                     </button>
+                    <button
+                            *ngIf="user"
+                            type="button"
+                            class="btn btn-default"
+                            [disabled]="!selectedShipment"
+                            (click)="dialogAddComment.show()">
+                        <span class="glyphicon glyphicon-comment"></span> Добавить комментарий
+                    </button>
+                    <button
+                            *ngIf="user==users[1]"
+                            type="button"
+                            class="btn btn-default"
+                            [disabled]="!selectedShipment"
+                            (click)="dialogCloseShipment.show()">
+                        <span class="glyphicon glyphicon-check"></span> Закрыть
+                    </button>
                 </div>
-                <div class="btn-group input-group" role="group">
-                    <span class="input-group-addon" id="basic-addon1">Неделя</span>
+                <div class="btn-group" role="group">
                     <button *ngFor="let week of weeks"
                             class="btn btn-default"
                             (click)="selectWeek(week)"
                             [ngClass]="{active:selectedWeek===week}">
-                        <strong *ngIf="currentWeek===week">{{week}}</strong>
+                        <span class="text-success" *ngIf="currentWeek===week">{{week}}</span>
                         <span *ngIf="currentWeek!=week">{{week}}</span>
                     </button>
                 </div>
+                <div class="btn-group" role="group" style="float: right; position: relative">
+                    <button class="btn btn-default" (click)="dialogLogin.show()">
+                        <span class="glyphicon glyphicon-user"></span>
+                        <span *ngIf="user">{{user}}</span>
+                    </button>
+                </div>
             </div>
+
         </td>
     </tr>
     <tr class="info">
@@ -78,6 +107,7 @@
                     *ngIf="interval.shipments.indexOf(shipment)==0">{{interval}}
                 </td>
                 <td class="active" (click)="selectShipment(shipment, interval, day)" [ngClass]="{success:selectedShipment===shipment}">
+                    <span *ngIf="shipment.urgent" class="glyphicon glyphicon-exclamation-sign"></span>
                     {{shipment.customer}}
                 </td>
                 <td class="active" (click)="selectShipment(shipment, interval, day)" [ngClass]="{success:selectedShipment===shipment}">
@@ -123,6 +153,7 @@
         </template>
     </template>
 </table>
+
 <div bsModal #dialogAddShipment="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
@@ -142,12 +173,13 @@
 
                         <label for="new-dispatcher">Экспедитор</label>
                         <select class="form-control" id="new-dispatcher" [(ngModel)]="newShipment.dispatcher.id">
-                            <option *ngFor="let dispatcher of dispatchers" [value]="dispatcher.id">{{dispatcher}}</option>
+                            <option *ngFor="let dispatcher of dispatchers" [value]="dispatcher.id">{{dispatcher}}
+                            </option>
                         </select>
 
                         <label for="new-pallets">Количество паллет</label>
                         <select class="form-control" id="new-pallets" [(ngModel)]="newShipment.plannedPallets">
-                            <option *ngFor="let n of availablePallets" [value]="n">{{n}}</option>
+                            <option *ngFor="let n of availablePallets">{{n}}</option>
                         </select>
 
                         <label for="new-vehicle">Машина</label>
@@ -157,15 +189,188 @@
                         <input class="form-control" id="new-driver" [(ngModel)]="newShipment.driver"/>
 
                         <label for="new-telephone">Телефон для связи</label>
-                        <input class="form-control" id="new-telephone" [(ngModel)]="newShipment.telephone" (blur)="validate()" (keyup)="validate()" />
+                        <input class="form-control" id="new-telephone" [(ngModel)]="newShipment.telephone" (blur)="validate()" (keyup)="validate()"/>
+
+                        <label for="new-comments">Комментарии</label>
+                        <input class="form-control" id="new-comments" [(ngModel)]="newShipment.comments"/>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" (click)="dialogAddShipment.hide()" class="btn btn-default">Отмена</button>
-                <button type="submit" (click)="saveShipment();dialogAddShipment.hide()" class="btn btn-default">Добавить</button>
+                <button type="submit" (click)="saveShipment();dialogAddShipment.hide()" class="btn btn-default">
+                    Добавить
+                </button>
             </div>
         </div>
     </div>
 </div>
 
+<div bsModal #dialogEditShipment="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" (click)="dialogEditShipment.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Редактировать запись</h4>
+            </div>
+            <div class="modal-body" *ngIf="selectedShipment">
+                <form>
+                    <div class="form-group">
+                        <label for="new-customer">Клиент</label>
+                        <select class="form-control" id="new-customer" [(ngModel)]="selectedShipment.customer.id">
+                            <option *ngFor="let customer of customers" [value]="customer.id">{{customer}}</option>
+                        </select>
+
+                        <label for="new-dispatcher">Экспедитор</label>
+                        <select class="form-control" id="new-dispatcher" [(ngModel)]="selectedShipment.dispatcher.id">
+                            <option *ngFor="let dispatcher of dispatchers" [value]="dispatcher.id">{{dispatcher}}
+                            </option>
+                        </select>
+
+                        <label for="new-pallets">Количество паллет</label>
+                        <select class="form-control" id="new-pallets" [(ngModel)]="selectedShipment.plannedPallets">
+                            <option *ngFor="let n of maxPallets">{{n}}</option>
+                        </select>
+
+                        <label for="new-vehicle">Машина</label>
+                        <input class="form-control" id="new-vehicle" [(ngModel)]="selectedShipment.vehicle"/>
+
+                        <label for="new-driver">ФИО водителя</label>
+                        <input class="form-control" id="new-driver" [(ngModel)]="selectedShipment.driver"/>
+
+                        <label for="new-telephone">Телефон для связи</label>
+                        <input class="form-control" id="new-telephone" [(ngModel)]="selectedShipment.telephone" (blur)="validate()" (keyup)="validate()"/>
+
+                        <label for="new-comments">Комментарии</label>
+                        <input class="form-control" id="new-comments" [(ngModel)]="selectedShipment.comments"/>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" (click)="dialogEditShipment.hide()" class="btn btn-default">Отмена</button>
+                <button type="submit" (click)="editSelectedShipment();dialogEditShipment.hide()" class="btn btn-default">
+                    Добавить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div bsModal #dialogLogin="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" (click)="dialogLogin.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Авторизация</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="new-username">Пользователь</label>
+                        <select class="form-control" id="new-username" [(ngModel)]="tempUserId">
+                            <option *ngFor="let u of users" [value]="users.indexOf(u)">{{u}}</option>
+                        </select>
+
+                        <label for="new-password"> Пароль</label>
+                        <input class="form-control" id="new-password" [(ngModel)]="tempPassword"/>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" (click)="dialogLogin.hide()" class="btn btn-default">Отмена</button>
+                <button type="submit" (click)="authorize()?dialogLogin.hide():null" class="btn btn-default">Вход
+                </button>
+                <br><br>
+                <div *ngIf="authErr" class="alert alert-danger" role="alert">{{authErr}}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div bsModal #dialogRemoveShipment="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" (click)="dialogRemoveShipment.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Удалить запись</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label>Удалить запись?</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" (click)="dialogRemoveShipment.hide()" class="btn btn-default">Отмена</button>
+                <button type="submit" (click)="removeSelectedShipment();dialogRemoveShipment.hide()" class="btn btn-default">Удалить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div bsModal #dialogCloseShipment="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" (click)="dialogCloseShipment.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Закрыть запись</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <label for="selected-pallets">Количество паллет факт</label>
+                    <select class="form-control" id="selected-pallets" [(ngModel)]="actualPallets">
+                        <option *ngFor="let n of maxPallets">{{n}}</option>
+                    </select>
+
+                    <label for="selected-arrived">Время прибытия</label>
+                    <select class="form-control" id="selected-arrived" [(ngModel)]="arrived">
+                        <option *ngFor="let hour of hours" value="hour.id">{{hour}}</option>
+                    </select>
+
+                    <label for="selected-loaded">Время погрузки</label>
+                    <select class="form-control" id="selected-loaded" [(ngModel)]="loaded">
+                        <option *ngFor="let hour of hours" value="hour.id">{{hour}}</option>
+                    </select>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" (click)="dialogCloseShipment.hide()" class="btn btn-default">Отмена</button>
+                <button type="submit" (click)="closeSelectedShipment();dialogCloseShipment.hide()" class="btn btn-default">Закрыть
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div bsModal #dialogAddComment="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" (click)="dialogAddComment.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Добавить комментарий</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <input class="form-control" [(ngModel)]="comment" />
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" (click)="dialogAddComment.hide()" class="btn btn-default">Отмена</button>
+                <button type="submit" (click)="addComment();dialogAddComment.hide()" class="btn btn-default">Добавить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

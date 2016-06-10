@@ -18,6 +18,8 @@ import { CORE_DIRECTIVES, FORM_DIRECTIVES } from '@angular/common';
 import { ShipmentSaveService } from '../services/ShipmentSaveService';
 import { Day } from '../classes/Day';
 import { ShipmentRemoveService } from '../services/ShipmentRemoveService';
+import { User } from '../classes/User';
+import { Hour } from '../classes/Hour';
 
 @Component({
     selector: 'timetable',
@@ -64,13 +66,31 @@ export class TimetableComponent implements OnInit {
     today: Day                 = Day.fromDate(TimetableComponent.CURRENT_DATE);
     selectedDay: Day           = Day.MONDAY;
     intervals                  = TimetableComponent.INTERVALS;
-    customers: Customer[]      = [];
-    dispatchers: Dispatcher[]  = [];
+    customers: Customer[]      = Customer.getCustomers();
+    dispatchers: Dispatcher[]  = Dispatcher.getDispatchers();
     error: any                 = null;
     newShipment: Shipment      = new Shipment(this.currentWeek);
     availablePallets: number[] = [];
+    maxPallets                 = TimetableComponent.getRange(Interval.MAX_PALLETS);
     selectedShipment: Shipment;
     selectedInterval: Interval;
+    users                      = User.getUsers();
+    user: User;
+    tempUserId: number;
+    tempPassword: string;
+    authErr: string;
+    hours                      = Hour.getHours();
+    comment: string;
+
+    authorize(): boolean {
+        this.authErr = null;
+        if (this.users[this.tempUserId].password == this.tempPassword) {
+            this.user = this.users[this.tempUserId];
+            return true;
+        }
+        this.authErr = 'Неверный пароль';
+        return false;
+    }
 
     selectWeek(week: Week): void {
         this.selectedWeek = week;
@@ -90,7 +110,7 @@ export class TimetableComponent implements OnInit {
         this.selectWeek(this.nextWeek);
     }
 
-    selectShipment(shipment: Shipment, interval?: Interval, day?: Day): void {
+    selectShipment(shipment: Shipment, interval?: Interval, day?: Day): void {        
         this.selectedShipment = shipment;
         this.selectedInterval = interval || shipment.plannedInterval;
         if (day) this.selectDay(day);
@@ -119,6 +139,7 @@ export class TimetableComponent implements OnInit {
     prepareNewShipment(): void {
         if (!this.selectedInterval) this.availablePallets = TimetableComponent.getRange(Interval.MAX_PALLETS);
         this.availablePallets            = TimetableComponent.getRange(this.selectedInterval.getAvailablePallets());
+        this.newShipment.plannedPallets  = this.availablePallets[0];
         this.newShipment.week            = this.selectedWeek;
         this.newShipment.day             = this.selectedDay;
         this.newShipment.plannedInterval = this.selectedInterval;
@@ -164,11 +185,7 @@ export class TimetableComponent implements OnInit {
     }
 
     ngOnInit(): any {
-        this.newShipment.week            = this.currentWeek;
-        this.newShipment.day             = Day.MONDAY;
-        this.newShipment.plannedInterval = new Interval(1);
-        this.newShipment.plannedPallets  = 33;
-        this.loadCustomers();
+        this.selectCurrentWeek();
     }
 
     loadCustomers(): void {
@@ -202,7 +219,50 @@ export class TimetableComponent implements OnInit {
             plannedPallets: s.plannedPallets,
             vehicle: s.vehicle,
             driver: s.driver,
-            telephone: s.telephone
+            telephone: s.telephone,
+            comments: s.comments
+        };
+        this.shipmentSaveService
+            .post(o)
+            .subscribe(() => this.loadShipments());
+    }
+
+    editSelectedShipment(): any {
+        var s = this.selectedShipment;
+        if (!s) return;
+        var o = {            
+            customerId: s.customer.id,
+            dispatcherId: s.dispatcher.id,
+            plannedInterval: s.plannedInterval.id,
+            plannedPallets: s.plannedPallets,
+            vehicle: s.vehicle,
+            driver: s.driver,
+            telephone: s.telephone            
+        };
+        this.shipmentSaveService
+            .post(o)
+            .subscribe(() => this.loadShipments());
+    }
+
+    closeSelectedShipment(): any {
+        if (!this.selectedShipment) return;
+        var s = this.selectedShipment;
+        var o = {
+            arrived: s.arrived,
+            loaded: s.loaded,
+            actualPallets: s.actualPallets
+        };
+        this.shipmentSaveService
+            .post(o)
+            .subscribe(() => this.loadShipments());
+    }
+
+    addComment(): any {
+        if (!this.selectedShipment) return;
+        var s = this.selectedShipment;
+        var o = {
+            id: s.id,
+            comment: s.comments + '<br>' + this.comment
         };
         this.shipmentSaveService
             .post(o)
@@ -211,7 +271,7 @@ export class TimetableComponent implements OnInit {
 
     removeSelectedShipment(): any {
         if (this.selectedShipment) this.shipmentRemoveService
-            .post(this.selectedShipment)
-            .subscribe(() => this.loadShipments());
+            .post(this.selectedShipment.id)
+            .subscribe(() => this.selectWeek(this.selectedWeek));
     }
 }

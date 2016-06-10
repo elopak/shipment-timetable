@@ -19,6 +19,7 @@ export class Shipment extends Indexed {
     plannedInterval: Interval;
     arrived: number;
     loaded: number;
+    urgent = false;
 
     ticket: string;
     vehicle: string;
@@ -50,5 +51,4 @@ export class Shipment extends Indexed {
     isOnTime(): boolean {
         return this.getActualInterval().equals(this.plannedInterval);
     }
-
 }
