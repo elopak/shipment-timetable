@@ -54,7 +54,7 @@
                         <span *ngIf="currentWeek!=week">{{week}}</span>
                     </button>
                 </div>
-                <div class="btn-group" role="group" style="float: right; position: relative">
+                <div class="btn-group" role="group" style="float: right; position: relative" data-toggle="popover" title="Popover title" data-content="And here's some amazing content. It's very engaging. Right?">
                     <button class="btn btn-default" (click)="dialogLogin.show()">
                         <span class="glyphicon glyphicon-user"></span>
                         <span *ngIf="user">{{user}}</span>
